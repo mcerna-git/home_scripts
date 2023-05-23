@@ -14,9 +14,9 @@ Requirements:
 Takes 3 parameters
 - **input_folder** (string | mandatory)
 - **sharpen** (boolean | optional | default false): if true applies a luma sharpen filter of 5/5/1.25
-- **audio** (boolean | optional | default true): if true transcodes audio to opus
+- **audio** (boolean | optional | default false): if true transcodes audio to opus
 
-The script converts all mkv and mp4 files found in the **input_folder** using libsvtav1 and libopus
+The script converts all mkv and mp4 files found in the **input_folder** using av1 and libopus or aac depending on the numbers of channels
 For cleaning purpose titles of video and audio tracks are emptied, the file itself takes the input file name
 
 # batch_rename_files.sh

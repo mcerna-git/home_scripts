@@ -5,7 +5,7 @@ input_folder="$1"
 
 # Optional arguments: sharpen (true/false), audio (true/false)
 sharpen="${2:-false}"
-audio="${3:-true}"
+audio="${3:-false}"
 
 # Create "av1" subfolder if it doesn't exist
 mkdir -p "${input_folder}/av1"
