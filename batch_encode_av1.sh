@@ -26,15 +26,24 @@ while IFS= read -r -d '' file; do
         filter_options="-vf unsharp=luma_msize_x=5:luma_msize_y=5:luma_amount=1.25"
     fi
 
-    # Get audio channel count
+    # Get audio channel count and channel layout
     channel_count=$(ffprobe -v error -select_streams a:0 -show_entries stream=channels -of default=noprint_wrappers=1:nokey=1 "$file")
+    channel_layout=$(ffprobe -v error -select_streams a:0 -show_entries stream=channel_layout -of default=noprint_wrappers=1:nokey=1 "$file")
 
-    # Set audio bitrate based on channel configuration
+    # Set audio codec and bitrate based on channel configuration
     if [ "$channel_count" -gt 2 ]; then
-        audio_bitrate="256k"
+        if [ "$channel_layout" = "5.1(side)" ]; then
+            audio_codec="aac"
+            audio_bitrate="256k"
+        else
+            audio_codec="libopus"
+            audio_bitrate="256k"
+        fi
     elif [ "$channel_count" -eq 1 ]; then
+        audio_codec="libopus"
         audio_bitrate="64k"
     else
+        audio_codec="libopus"
         audio_bitrate="128k" # Default bitrate for 2.0
     fi
 
@@ -47,6 +56,8 @@ while IFS= read -r -d '' file; do
     # Check if audio transcoding is enabled
     if [ "$audio" = "true" ]; then
         echo "Channel count: $channel_count"
+        echo "Channel layout: $channel_layout"
+        echo "Applied audio codec: $audio_codec"
         echo "Applied audio bitrate: $audio_bitrate"
     else
         echo "Audio copied without transcoding"
@@ -54,7 +65,7 @@ while IFS= read -r -d '' file; do
 
     # Generate FFmpeg command line
     if [ "$audio" = "true" ]; then
-        ffmpeg_command="ffmpeg -hide_banner -loglevel quiet -stats -i \"$file\" -c:v libsvtav1 -crf 20 -preset 6 -g 240 -svtav1-params tune=0:enable-overlays=1:scd=1 $filter_options -metadata title=\"${filename%.*}\" -metadata:s:v title= -metadata:s:a title= -c:a libopus -b:a $audio_bitrate \"${input_folder}/av1/$filename\""
+        ffmpeg_command="ffmpeg -hide_banner -loglevel quiet -stats -i \"$file\" -c:v libsvtav1 -crf 20 -preset 6 -g 240 -svtav1-params tune=0:enable-overlays=1:scd=1 $filter_options -metadata title=\"${filename%.*}\" -metadata:s:v title= -metadata:s:a title= -c:a $audio_codec -b:a $audio_bitrate \"${input_folder}/av1/$filename\""
     else
         ffmpeg_command="ffmpeg -hide_banner -loglevel quiet -stats -i \"$file\" -c:v libsvtav1 -crf 20 -preset 6 -g 240 -svtav1-params tune=0:enable-overlays=1:scd=1 $filter_options -metadata title=\"${filename%.*}\" -metadata:s:v title= -metadata:s:a title= -c:a copy \"${input_folder}/av1/$filename\""
     fi
