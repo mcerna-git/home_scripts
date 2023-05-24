@@ -100,7 +100,7 @@ while IFS= read -r -d '' file; do
     duration=$(bc <<< "$end_time - $start_time")
 
     # Calculate the minutes and seconds from the duration using bc
-    minutes=$(bc <<< "scale=0; $duration/60")
+    minutes=$(printf "%.0f" $(bc <<< "scale=0; ($duration+30)/60"))
     seconds=$(bc <<< "scale=0; $duration%60")
 
     # Print the completion message with the duration
