@@ -100,11 +100,13 @@ while IFS= read -r -d '' file; do
     duration=$(bc <<< "$end_time - $start_time")
 
     # Calculate the minutes and seconds from the duration using bc
-    minutes=$(printf "%.0f" $(bc <<< "scale=0; ($duration+30)/60"))
+    minutes=$(bc <<< "scale=0; $minutes%60")
     seconds=$(bc <<< "scale=0; $duration%60")
 
     # Print the completion message with the duration
-    if [ "$duration" -lt 1 ]; then
+    # Convert duration to float for comparison
+    duration_float=$(bc -l <<< "$duration")
+    if [ $(bc <<< "$duration_float < 1") -eq 1 ]; then
         echo "Finished processing file: $filename (Duration: 0m 0s)"
     else
         echo "Finished processing file: $filename (Duration: ${minutes}m ${seconds%.*}s)"
