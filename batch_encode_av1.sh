@@ -29,7 +29,7 @@ while IFS= read -r -d '' file; do
 
     # Get input file resolution
     resolution_info=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "$file")
-    input_width_resolution=$(echo "$resolution_info" | awk -F 'x' '{print $1 }')
+    input_height_resolution=$(echo "$resolution_info" | awk -F 'x' '{print $2 }')
 
     # Get audio channel count and channel layout
     channel_count=$(ffprobe -v error -select_streams a:0 -show_entries stream=channels -of default=noprint_wrappers=1:nokey=1 "$file")
@@ -65,9 +65,9 @@ while IFS= read -r -d '' file; do
         echo "Audio copied without transcoding"
     fi
     
-    echo "Input width resolution: $input_width_resolution"
+    echo "Input height resolution: $input_height_resolution"
     if [ "$resolution" -gt 0 ]; then
-        echo "Output width Resolution: $resolution"
+        echo "Output height Resolution: $resolution"
     else
         echo "No video rescaling"
     fi
@@ -83,7 +83,7 @@ while IFS= read -r -d '' file; do
 
     # Add resolution scaling if specified
     if [ "$resolution" -gt 0 ]; then
-        ffmpeg_command+=" -vf scale=$resolution:-2"
+        ffmpeg_command+=" -vf scale=:$resolution-2"
     fi
 
     ffmpeg_command+=" \"${input_folder}/av1/$filename\""

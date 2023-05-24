@@ -14,7 +14,7 @@ Requirements:
 Takes 4 parameters
 - **input_folder** (string | mandatory)
 - **audio** (boolean | optional | default false): if true transcodes audio to opus or aac depending on the number of channels
-- **resolution** (integer | optional | default 0): if enabled applies a bicubic scaling filter
+- **resolution** (integer | optional | default 0): if enabled applies a bicubic scaling filter based on the height resolution
 - **sharpen** (boolean | optional | default false): if true applies a luma sharpen filter of 5/5/1.25
 
 The script converts all mkv and mp4 files found in the **input_folder**
