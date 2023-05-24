@@ -83,7 +83,7 @@ while IFS= read -r -d '' file; do
 
     # Add resolution scaling if specified
     if [ "$resolution" -gt 0 ]; then
-        ffmpeg_command+=" -vf scale=:$resolution-2"
+        ffmpeg_command+=" -vf scale=-2:$resolution"
     fi
 
     ffmpeg_command+=" \"${input_folder}/av1/$filename\""
