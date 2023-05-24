@@ -3,9 +3,10 @@
 # Input folder
 input_folder="$1"
 
-# Optional arguments: sharpen (true/false), audio (true/false)
-sharpen="${2:-false}"
-audio="${3:-false}"
+# Optional arguments: audio (true/false), resolution, sharpen (true/false)
+audio="${2:-false}"
+resolution="${3:-0}"
+sharpen="${4:-false}"
 
 # Create "av1" subfolder if it doesn't exist
 mkdir -p "${input_folder}/av1"
@@ -25,6 +26,10 @@ while IFS= read -r -d '' file; do
     if [ "$sharpen" = "true" ]; then
         filter_options="-vf unsharp=luma_msize_x=5:luma_msize_y=5:luma_amount=1.25"
     fi
+
+    # Get input file resolution
+    resolution_info=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "$file")
+    input_width_resolution=$(echo "$resolution_info" | awk -F 'x' '{print $1 }')
 
     # Get audio channel count and channel layout
     channel_count=$(ffprobe -v error -select_streams a:0 -show_entries stream=channels -of default=noprint_wrappers=1:nokey=1 "$file")
@@ -50,9 +55,6 @@ while IFS= read -r -d '' file; do
     # Print processing information
     echo "########################################"
     echo "Processing file: $filename"
-    echo "Sharpening enabled: $sharpen"
-    echo "Audio transcoding: $audio"
-
     # Check if audio transcoding is enabled
     if [ "$audio" = "true" ]; then
         echo "Channel count: $channel_count"
@@ -62,13 +64,29 @@ while IFS= read -r -d '' file; do
     else
         echo "Audio copied without transcoding"
     fi
+    
+    echo "Input width resolution: $input_width_resolution"
+    if [ "$resolution" -gt 0 ]; then
+        echo "Output width Resolution: $resolution"
+    else
+        echo "No video rescaling"
+    fi
+
+    echo "Sharpening enabled: $sharpen"
 
     # Generate FFmpeg command line
     if [ "$audio" = "true" ]; then
-        ffmpeg_command="ffmpeg -hide_banner -loglevel quiet -stats -i \"$file\" -c:v libsvtav1 -crf 20 -preset 6 -g 240 -svtav1-params tune=0:enable-overlays=1:scd=1 $filter_options -metadata title=\"${filename%.*}\" -metadata:s:v title= -metadata:s:a title= -c:a $audio_codec -b:a $audio_bitrate \"${input_folder}/av1/$filename\""
+        ffmpeg_command="ffmpeg -hide_banner -loglevel quiet -stats -i \"$file\" -c:v libsvtav1 -crf 20 -preset 6 -g 240 -svtav1-params tune=0:enable-overlays=1:scd=1 $filter_options -metadata title=\"${filename%.*}\" -metadata:s:v title= -metadata:s:a title= -c:a $audio_codec -b:a $audio_bitrate"
     else
-        ffmpeg_command="ffmpeg -hide_banner -loglevel quiet -stats -i \"$file\" -c:v libsvtav1 -crf 20 -preset 6 -g 240 -svtav1-params tune=0:enable-overlays=1:scd=1 $filter_options -metadata title=\"${filename%.*}\" -metadata:s:v title= -metadata:s:a title= -c:a copy \"${input_folder}/av1/$filename\""
+        ffmpeg_command="ffmpeg -hide_banner -loglevel quiet -stats -i \"$file\" -c:v libsvtav1 -crf 20 -preset 6 -g 240 -svtav1-params tune=0:enable-overlays=1:scd=1 $filter_options -metadata title=\"${filename%.*}\" -metadata:s:v title= -metadata:s:a title= -c:a copy"
     fi
+
+    # Add resolution scaling if specified
+    if [ "$resolution" -gt 0 ]; then
+        ffmpeg_command+=" -vf scale=$resolution:-2"
+    fi
+
+    ffmpeg_command+=" \"${input_folder}/av1/$filename\""
 
     echo "FFmpeg command line: $ffmpeg_command"
     echo "########################################"
