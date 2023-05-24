@@ -1,14 +1,15 @@
 #!/bin/bash
 
 # Check if the required arguments are provided
-if [ $# -lt 2 ]; then
-  echo "Usage: $0 <text_file> <target_folder>"
+if [ $# -lt 3 ]; then
+  echo "Usage: $0 <text_file> <target_folder> <extension>"
   exit 1
 fi
 
 # Retrieve the command-line arguments
 text_file=$1
 target_folder=$2
+extension=$3
 
 # Check if the target folder exists
 if [ ! -d "$target_folder" ]; then
@@ -16,11 +17,23 @@ if [ ! -d "$target_folder" ]; then
   exit 1
 fi
 
+# Check if the text file is empty
+if [ ! -s "$text_file" ]; then
+  echo "Text file is empty."
+  exit 1
+fi
+
 # Read the lines of the text file and store them in an array
 IFS=$'\n' read -d '' -r -a names < "$text_file"
 
-# Get a sorted list of files in the target folder (excluding subfolders)
-mapfile -d $'\0' -t files < <(find "$target_folder" -maxdepth 1 -type f -print0 | sort -z)
+# Get a sorted list of files in the target folder (excluding subfolders) with the specified extension
+mapfile -d $'\0' -t files < <(find "$target_folder" -maxdepth 1 -type f -name "*.$extension" -print0 | sort -z)
+
+# Check if any files are found
+if [ ${#files[@]} -eq 0 ]; then
+  echo "No files found with the specified extension in the target folder."
+  exit 1
+fi
 
 # Display the before/after filenames (only file names)
 echo "Before:"

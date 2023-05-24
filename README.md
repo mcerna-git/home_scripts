@@ -11,7 +11,7 @@ Requirements:
 - ffmpeg with libsvtav1 and libopus enabled
 - bc
 
-Takes 3 parameters
+Takes 4 parameters
 - **input_folder** (string | mandatory)
 - **audio** (boolean | optional | default false): if true transcodes audio to opus or aac depending on the number of channels
 - **resolution** (integer | optional | default 0): if enabled applies a bicubic scaling filter
@@ -23,9 +23,10 @@ For cleaning purpose titles of video and audio tracks are emptied, the file itse
 # batch_rename_files.sh
 Requirements none
 
-Takes 2 parameters
+Takes 3 parameters
 - **text_file** (string | mandatory)
 - **target_folder** (string | mandatory)
+- **extension** (string | mandatory)
 
-The script reads the content of **text_file** and then renames files contained in **target_folder** with each line of text_file
+The script reads the content of **text_file** and then renames files contained in **target_folder** matching **extension** with each line of text_file
 - file1 renamed to line1, file2 renamed to line2 and so on
