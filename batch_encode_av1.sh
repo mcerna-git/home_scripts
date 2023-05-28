@@ -24,7 +24,7 @@ while IFS= read -r -d '' file; do
     # Set FFmpeg filter options
     filter_options=""
     if [ "$sharpen" = "true" ]; then
-        filter_options="-vf unsharp=luma_msize_x=5:luma_msize_y=5:luma_amount=1.25"
+        filter_options="-vf unsharp=luma_msize_x=5:luma_msize_y=5:luma_amount=1"
     fi
 
     # Get input file resolution
