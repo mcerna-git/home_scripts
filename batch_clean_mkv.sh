@@ -48,7 +48,7 @@ for file in "$input_folder"/*.mkv; do
       audio_track_ids=$(mkvmerge -J "$file" | jq -r --arg audio_lng "$audio_lng" '.tracks[] | select(.type == "audio" and .properties.language == $audio_lng) | .id')
     fi
 
-    subtitle_track_ids=$(mkvmerge -J "$file" | jq -r --arg sub_lng "$sub_lng" '.tracks[] | select(.type == "subtitles" and .properties.language == $sub_lng and .properties.default_track == true) | .id')
+    subtitle_track_ids=$(mkvmerge -J "$file" | jq -r --arg sub_lng "$sub_lng" '.tracks[] | select(.type == "subtitles" and .properties.language == $sub_lng) | .id')
 
     echo "audio_track_ids: $audio_track_ids"
     echo "subtitle_track_ids: $subtitle_track_ids"
